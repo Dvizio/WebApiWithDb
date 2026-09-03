@@ -3,9 +3,9 @@ using WebApiWithDb.Models;
 
 namespace WebApiWithDb.Data
 {
-    public class AppDbContext : DbContext
+    public class GameDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+        public GameDbContext(DbContextOptions<GameDbContext> options) : base(options) { }
 
         public DbSet<Player> Players { get; set; }
         public DbSet<Game> Games { get; set; }

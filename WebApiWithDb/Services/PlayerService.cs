@@ -2,17 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using WebApiWithDb.Data; // Adjust namespace to match your DbContext
+using WebApiWithDb.Data;
 using WebApiWithDb.Models;
 
 namespace WebApiWithDb.Services
 {
-
     public class PlayerService : IPlayerService
     {
-        private readonly GameDbContext _context; // Replace AppDbContext with your actual DbContext class
+        private readonly GameDbContext _context;
 
-        public PlayerService(AppDbContext context)
+        public PlayerService(GameDbContext context)
         {
             _context = context;
         }
@@ -20,6 +19,7 @@ namespace WebApiWithDb.Services
         public async Task<IEnumerable<Player>> GetAllPlayersAsync()
         {
             return await _context.Players
+                .Include(p => p.Games)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -27,6 +27,7 @@ namespace WebApiWithDb.Services
         public async Task<Player?> GetPlayerByIdAsync(int id)
         {
             return await _context.Players
+                .Include(p => p.Games)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -82,6 +83,7 @@ namespace WebApiWithDb.Services
         public async Task<IEnumerable<Player>> GetLeaderboardAsync(int topCount = 10)
         {
             return await _context.Players
+                .Include(p => p.Games)
                 .AsNoTracking()
                 .OrderByDescending(p => p.Score)
                 .Take(topCount)

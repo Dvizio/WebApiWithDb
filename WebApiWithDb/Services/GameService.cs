@@ -8,7 +8,7 @@ namespace WebApiWithDb.Services
     {
         private readonly GameDbContext _context;
 
-        public GameService(AppDbContext context)
+        public GameService(GameDbContext context)
         {
             _context = context;
         }

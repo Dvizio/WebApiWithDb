@@ -1,6 +1,98 @@
 @WebApiWithDb_HostAddress = http://localhost:5155
 
-GET {{WebApiWithDb_HostAddress}}/weatherforecast/
+### 1. Create Player 1 (Alice)
+POST {{WebApiWithDb_HostAddress}}/api/players
+Content-Type: application/json
+
+{
+  "name": "Alice",
+  "score": 100
+}
+
+### 2. Create Player 2 (Bob)
+POST {{WebApiWithDb_HostAddress}}/api/players
+Content-Type: application/json
+
+{
+  "name": "Bob",
+  "score": 150
+}
+
+### 3. Get All Players
+GET {{WebApiWithDb_HostAddress}}/api/players
 Accept: application/json
 
-###
+### 4. Get Player By ID
+GET {{WebApiWithDb_HostAddress}}/api/players/1
+Accept: application/json
+
+### 5. Get Leaderboard (Top Players)
+GET {{WebApiWithDb_HostAddress}}/api/players/leaderboard?topCount=5
+Accept: application/json
+
+### 6. Update Player
+PUT {{WebApiWithDb_HostAddress}}/api/players/1
+Content-Type: application/json
+
+{
+  "name": "Alice Johnson",
+  "score": 120
+}
+
+### 7. Update Player Score
+PATCH {{WebApiWithDb_HostAddress}}/api/players/1/score
+Content-Type: application/json
+
+{
+  "score": 200
+}
+
+### 8. Create Game
+POST {{WebApiWithDb_HostAddress}}/api/games
+Content-Type: application/json
+
+{
+  "gameId": "GAME-2026-001"
+}
+
+### 9. Add Player 1 to Game 1
+POST {{WebApiWithDb_HostAddress}}/api/games/1/players
+Content-Type: application/json
+
+{
+  "playerId": 1
+}
+
+### 10. Add Player 2 to Game 1
+POST {{WebApiWithDb_HostAddress}}/api/games/1/players
+Content-Type: application/json
+
+{
+  "playerId": 2
+}
+
+### 11. Get All Games
+GET {{WebApiWithDb_HostAddress}}/api/games
+Accept: application/json
+
+### 12. Get Game By ID
+GET {{WebApiWithDb_HostAddress}}/api/games/1
+Accept: application/json
+
+### 13. Get Game By Custom GameId
+GET {{WebApiWithDb_HostAddress}}/api/games/custom/GAME-2026-001
+Accept: application/json
+
+### 14. Finish Game with Winner
+POST {{WebApiWithDb_HostAddress}}/api/games/1/finish
+Content-Type: application/json
+
+{
+  "winner": "Alice Johnson"
+}
+
+### 15. Delete Game
+DELETE {{WebApiWithDb_HostAddress}}/api/games/1
+
+### 16. Delete Player
+DELETE {{WebApiWithDb_HostAddress}}/api/players/1
