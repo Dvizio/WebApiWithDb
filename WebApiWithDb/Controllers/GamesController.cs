@@ -84,6 +84,42 @@ namespace WebApiWithDb.Controllers
             return NoContent();
         }
 
+        // PUT: api/games/{id}/score
+        [HttpPut("{id:int}/score")]
+        public async Task<IActionResult> UpdatePlayerScore(int id, [FromBody] GameScoreUpdateDto scoreDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _gameService.UpdatePlayerScoreAsync(id, scoreDto.PlayerId, scoreDto.Score);
+            if (!success)
+            {
+                return NotFound(new { message = $"Unable to update score. Please verify game with ID {id} and player with ID {scoreDto.PlayerId} exist." });
+            }
+
+            return NoContent();
+        }
+
+        // PUT: api/games/{id}/scoreboard
+        [HttpPut("{id:int}/scoreboard")]
+        public async Task<IActionResult> UpdateScoreBoard(int id, [FromBody] GameScoreBoardUpdateDto scoreBoardDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var success = await _gameService.UpdateScoreBoardAsync(id, scoreBoardDto.ScoreBoard);
+            if (!success)
+            {
+                return NotFound(new { message = $"Game with ID {id} not found." });
+            }
+
+            return NoContent();
+        }
+
         // POST: api/games/{id}/finish
         [HttpPost("{id:int}/finish")]
         public async Task<IActionResult> FinishGame(int id, [FromBody] GameFinishDto finishDto)
@@ -124,14 +160,13 @@ namespace WebApiWithDb.Controllers
                 Winner = game.Winner,
                 GameFinished = game.GameFinished,
                 CreatedAt = game.CreatedAt,
+                ScoreBoard = game.ScoreBoard ?? new Dictionary<int, int>(),
                 Players = game.Players?.Select(p => new PlayerSummaryDto
                 {
                     Id = p.Id,
-                    Name = p.Name,
-                    Score = p.Score
+                    Name = p.Name
                 }).ToList() ?? new List<PlayerSummaryDto>()
             };
         }
     }
 }
-

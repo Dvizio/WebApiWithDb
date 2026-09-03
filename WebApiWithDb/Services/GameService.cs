@@ -44,7 +44,8 @@ namespace WebApiWithDb.Services
                 GameId = gameId,
                 CreatedAt = DateTime.UtcNow,
                 GameFinished = false,
-                Winner = string.Empty
+                Winner = string.Empty,
+                ScoreBoard = new Dictionary<int, int>()
             };
 
             _context.Games.Add(game);
@@ -74,7 +75,78 @@ namespace WebApiWithDb.Services
 
             if (game == null || player == null) return false;
 
-            game.Players.Add(player);
+            if (!game.Players.Any(p => p.Id == playerId))
+            {
+                game.Players.Add(player);
+            }
+
+            game.ScoreBoard ??= new Dictionary<int, int>();
+            if (!game.ScoreBoard.ContainsKey(playerId))
+            {
+                game.ScoreBoard[playerId] = 0;
+            }
+
+            _context.Entry(game).Property(g => g.ScoreBoard).IsModified = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdatePlayerScoreAsync(int gameId, int playerId, int score)
+        {
+            var game = await _context.Games
+                .Include(g => g.Players)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null) return false;
+
+            var playerExists = await _context.Players.AnyAsync(p => p.Id == playerId);
+            if (!playerExists) return false;
+
+            // Ensure player is part of game if not already
+            if (!game.Players.Any(p => p.Id == playerId))
+            {
+                var player = await _context.Players.FindAsync(playerId);
+                if (player != null)
+                {
+                    game.Players.Add(player);
+                }
+            }
+
+            var updatedScoreBoard = new Dictionary<int, int>(game.ScoreBoard ?? new Dictionary<int, int>())
+            {
+                [playerId] = score
+            };
+            game.ScoreBoard = updatedScoreBoard;
+
+            _context.Entry(game).Property(g => g.ScoreBoard).IsModified = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateScoreBoardAsync(int gameId, Dictionary<int, int> scoreBoard)
+        {
+            var game = await _context.Games
+                .Include(g => g.Players)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null) return false;
+
+            // Ensure players in scoreboard are added to game
+            foreach (var playerId in scoreBoard.Keys)
+            {
+                if (!game.Players.Any(p => p.Id == playerId))
+                {
+                    var player = await _context.Players.FindAsync(playerId);
+                    if (player != null)
+                    {
+                        game.Players.Add(player);
+                    }
+                }
+            }
+
+            game.ScoreBoard = new Dictionary<int, int>(scoreBoard);
+            _context.Entry(game).Property(g => g.ScoreBoard).IsModified = true;
+
             await _context.SaveChangesAsync();
             return true;
         }

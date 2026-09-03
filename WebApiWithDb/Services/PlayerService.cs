@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApiWithDb.Data;
+using WebApiWithDb.DTOs;
 using WebApiWithDb.Models;
 
 namespace WebApiWithDb.Services
@@ -48,7 +46,6 @@ namespace WebApiWithDb.Services
             }
 
             existingPlayer.Name = player.Name;
-            existingPlayer.Score = player.Score;
 
             await _context.SaveChangesAsync();
             return true;
@@ -67,27 +64,42 @@ namespace WebApiWithDb.Services
             return true;
         }
 
-        public async Task<bool> UpdateScoreAsync(int id, int newScore)
+        public async Task<IEnumerable<PlayerLeaderboardDto>> GetLeaderboardAsync(int topCount = 10)
         {
-            var player = await _context.Players.FindAsync(id);
-            if (player == null)
-            {
-                return false;
-            }
-
-            player.Score = newScore;
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<IEnumerable<Player>> GetLeaderboardAsync(int topCount = 10)
-        {
-            return await _context.Players
+            var players = await _context.Players
                 .Include(p => p.Games)
                 .AsNoTracking()
-                .OrderByDescending(p => p.Score)
-                .Take(topCount)
                 .ToListAsync();
+
+            var leaderboard = players.Select(p =>
+            {
+                var highestScore = 0;
+                if (p.Games != null)
+                {
+                    foreach (var game in p.Games)
+                    {
+                        if (game.ScoreBoard != null && game.ScoreBoard.TryGetValue(p.Id, out var score))
+                        {
+                            if (score > highestScore)
+                            {
+                                highestScore = score;
+                            }
+                        }
+                    }
+                }
+
+                return new PlayerLeaderboardDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    HighestScore = highestScore
+                };
+            })
+            .OrderByDescending(p => p.HighestScore)
+            .Take(topCount)
+            .ToList();
+
+            return leaderboard;
         }
     }
 }

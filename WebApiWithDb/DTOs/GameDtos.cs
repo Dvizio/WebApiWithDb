@@ -22,6 +22,21 @@ namespace WebApiWithDb.DTOs
         public int PlayerId { get; set; }
     }
 
+    public class GameScoreUpdateDto
+    {
+        [Required]
+        public int PlayerId { get; set; }
+
+        [Required]
+        public int Score { get; set; }
+    }
+
+    public class GameScoreBoardUpdateDto
+    {
+        [Required]
+        public Dictionary<int, int> ScoreBoard { get; set; } = new();
+    }
+
     public class GameResponseDto
     {
         public int Id { get; set; }
@@ -29,6 +44,7 @@ namespace WebApiWithDb.DTOs
         public string Winner { get; set; } = string.Empty;
         public bool GameFinished { get; set; }
         public DateTime CreatedAt { get; set; }
+        public Dictionary<int, int> ScoreBoard { get; set; } = new();
         public List<PlayerSummaryDto> Players { get; set; } = new();
     }
 
@@ -41,4 +57,3 @@ namespace WebApiWithDb.DTOs
         public DateTime CreatedAt { get; set; }
     }
 }
-

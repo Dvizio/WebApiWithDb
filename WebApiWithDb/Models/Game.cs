@@ -11,6 +11,7 @@ namespace WebApiWithDb.Models
         public string GameId { get; set; } = string.Empty;
         public string Winner { get; set; } = string.Empty;
         public bool GameFinished { get; set; } = false;
+        public Dictionary<int, int> ScoreBoard { get; set; } = new Dictionary<int, int>();
         public DateTime CreatedAt { get; set; }
         public virtual ICollection<Player> Players { get; set; } = new List<Player>();
     }

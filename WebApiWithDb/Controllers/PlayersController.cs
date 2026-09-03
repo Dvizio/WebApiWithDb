@@ -40,16 +40,15 @@ namespace WebApiWithDb.Controllers
 
         // GET: api/players/leaderboard?topCount=10
         [HttpGet("leaderboard")]
-        public async Task<ActionResult<IEnumerable<PlayerResponseDto>>> GetLeaderboard([FromQuery] int topCount = 10)
+        public async Task<ActionResult<IEnumerable<PlayerLeaderboardDto>>> GetLeaderboard([FromQuery] int topCount = 10)
         {
             if (topCount <= 0)
             {
                 topCount = 10;
             }
 
-            var players = await _playerService.GetLeaderboardAsync(topCount);
-            var response = players.Select(MapToResponseDto);
-            return Ok(response);
+            var leaderboard = await _playerService.GetLeaderboardAsync(topCount);
+            return Ok(leaderboard);
         }
 
         // POST: api/players
@@ -63,8 +62,7 @@ namespace WebApiWithDb.Controllers
 
             var player = new Player
             {
-                Name = createDto.Name,
-                Score = createDto.Score
+                Name = createDto.Name
             };
 
             var createdPlayer = await _playerService.CreatePlayerAsync(player);
@@ -85,29 +83,10 @@ namespace WebApiWithDb.Controllers
             var player = new Player
             {
                 Id = id,
-                Name = updateDto.Name,
-                Score = updateDto.Score
+                Name = updateDto.Name
             };
 
             var updated = await _playerService.UpdatePlayerAsync(player);
-            if (!updated)
-            {
-                return NotFound(new { message = $"Player with ID {id} not found." });
-            }
-
-            return NoContent();
-        }
-
-        // PATCH: api/players/{id}/score
-        [HttpPatch("{id:int}/score")]
-        public async Task<IActionResult> UpdateScore(int id, [FromBody] PlayerScoreUpdateDto scoreDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var updated = await _playerService.UpdateScoreAsync(id, scoreDto.Score);
             if (!updated)
             {
                 return NotFound(new { message = $"Player with ID {id} not found." });
@@ -135,7 +114,6 @@ namespace WebApiWithDb.Controllers
             {
                 Id = player.Id,
                 Name = player.Name,
-                Score = player.Score,
                 Games = player.Games?.Select(g => new GameSummaryDto
                 {
                     Id = g.Id,
@@ -148,4 +126,3 @@ namespace WebApiWithDb.Controllers
         }
     }
 }
-
